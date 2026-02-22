@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Analytics AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00ff88;
+            --primary-dim: #00cc6a;
+            --bg-dark: #0a0a0a;
+            --bg-card: #161616;
+            --text-light: #f0f0f0;
+            --text-dim: #888888;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #0a0a0a 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        p.subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .main-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--glass);
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .file-info {
+            margin-top: 1rem;
+            font-weight: 500;
+            color: var(--primary);
+            display: none;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 100px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .status-text {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1;
+            width: 20%;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .step.active .step-dot {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            transform: scale(1.3);
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            transition: color 0.3s;
+            text-align: center;
+        }
+
+        .step.active .step-label {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        /* Result Section */
+        .result-section {
+            margin-top: 3rem;
+            display: none;
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loader */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Football Field Background Effect */
+        .field-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.03;
+            background:
+                linear-gradient(90deg, transparent 49%, #fff 49%, #fff 51%, transparent 51%),
+                linear-gradient(transparent 49%, #fff 49%, #fff 51%, transparent 51%);
+            background-size: 100px 100px;
+        }
+
+        /* Possession Graph */
+        .possession-container {
+            margin-bottom: 2rem;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .possession-title {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .possession-bar {
+            width: 100%;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .possession-team-1 {
+            height: 100%;
+            transition: width 1s ease, background-color 0.5s;
+        }
+
+        .possession-team-2 {
+            height: 100%;
+            transition: width 1s ease, background-color 0.5s;
+        }
+
+        .team-legend {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .stat-card p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .stat-team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .analysis-summary {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            padding: 0 1rem;
+        }
+
+        .stats-context-block {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stats-context-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .stats-context-description {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="field-lines"></div>
+
+    <div class="container">
+        <header>
+            <h1>Analysis AI</h1>
+            <p class="subtitle">Automated Football Match Analysis System</p>
+        </header>
+
+        <div class="main-card">
+            <!-- Upload Section -->
+            <div id="uploadSection">
+                <div class="upload-area" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>Drop your match footage here</h3>
+                    <p style="color: var(--text-dim); margin-top: 0.5rem; font-size: 0.9rem;">Supports MP4, AVI, MOV</p>
+                    <input type="file" id="fileInput" accept="video/*" hidden>
+                    <div id="fileInfo" class="file-info"></div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn" id="processBtn" disabled>
+                        <span class="btn-text">Start Analysis</span>
+                        <div class="spinner"></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressSection">
+                <h3 style="margin-bottom: 1rem;">Analyzing Match...</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="status-text">
+                    <span id="statusMessage">Initializing...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+
+                <!-- Visual Algorithm Steps -->
+                <div class="step-indicator">
+                    <div class="step" id="step1">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Reading</span>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Tracking</span>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Camera</span>
+                    </div>
+                    <div class="step" id="step4">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Tactics</span>
+                    </div>
+                    <div class="step" id="step5">
+                        <div class="step-dot"></div>
+                        <span class="step-label">Rendering</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <h3 style="margin-bottom: 0.5rem; color: var(--primary);">Analysis Complete</h3>
+                <p class="analysis-summary">The AI has finished extracting tactical and physical metrics from the match
+                    footage. Review the video overlay and the detailed statistical breakdown below.</p>
+
+                <video id="outputVideo" controls></video>
+
+                <div class="possession-container" id="possessionContainer" style="display: none; margin-top: 2rem;">
+                    <div class="possession-title">Total Ball Possession</div>
+                    <p
+                        style="text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-top: -0.5rem; margin-bottom: 1.5rem;">
+                        The percentage of active playtime each team controlled the ball.</p>
+                    <div class="possession-bar">
+                        <div class="possession-team-1" id="barTeam1"></div>
+                        <div class="possession-team-2" id="barTeam2"></div>
+                    </div>
+                    <div class="team-legend">
+                        <div class="team-info">
+                            <div class="color-box" id="colorBoxTeam1"></div>
+                            <span id="posTeam1" style="font-weight: bold;">0%</span>
+                        </div>
+                        <div class="team-info">
+                            <div class="color-box" id="colorBoxTeam2"></div>
+                            <span id="posTeam2" style="font-weight: bold;">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid" id="statsGrid" style="display: none; margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="possession-title" style="margin-bottom: 0;">Total Distance Covered</div>
+                        <p>Cumulative distance tracked across the pitch for all detected field players per team.</p>
+                        <div class="stat-value">
+                            <div class="stat-team">
+                                <div class="color-box" id="distColor1"></div>
+                                <span id="distTeam1" style="font-size: 1.5rem;">0m</span>
+                            </div>
+                            <div class="stat-team">
+                                <div class="color-box" id="distColor2"></div>
+                                <span id="distTeam2" style="font-size: 1.5rem;">0m</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="possession-title" style="margin-bottom: 0;">Max Sprint Speed</div>
+                        <p>The absolute highest velocity registered by any single player from the respective team.</p>
+                        <div class="stat-value">
+                            <div class="stat-team">
+                                <div class="color-box" id="speedColor1"></div>
+                                <span id="speedTeam1" style="font-size: 1.5rem;">0km/h</span>
+                            </div>
+                            <div class="stat-team">
+                                <div class="color-box" id="speedColor2"></div>
+                                <span id="speedTeam2" style="font-size: 1.5rem;">0km/h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn" onclick="location.reload()">Analyze Another</button>
+                    <a id="downloadLink" href="#" class="btn"
+                        style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">
+                        Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const processBtn = document.getElementById('processBtn');
+        const uploadSection = document.getElementById('uploadSection');
+        const progressSection = document.getElementById('progressSection');
+        const resultSection = document.getElementById('resultSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const statusMessage = document.getElementById('statusMessage');
+
+        let selectedFile = null;
+
+        // Drag and Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            fileInfo.textContent = `Selected: ${file.name}`;
+            fileInfo.style.display = 'block';
+            processBtn.disabled = false;
+        }
+
+        // Processing
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('video', selectedFile);
+
+            // UI State
+            processBtn.disabled = true;
+            processBtn.innerHTML = '<div class="spinner" style="display:block"></div> Processing...';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.task_id) {
+                    document.querySelector('.main-card').style.minHeight = '400px';
+                    uploadSection.style.display = 'none';
+                    progressSection.style.display = 'block';
+                    startPolling(data.task_id);
+                } else {
+                    alert('Upload failed');
+                    resetUI();
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred');
+                resetUI();
+            }
+        });
+
+        function resetUI() {
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<span class="btn-text">Start Analysis</span><div class="spinner"></div>';
+        }
+
+        function updateSteps(percent) {
+            // Rough mapping of progress % to steps
+            // 0-10: Reading, 10-40: Tracking, 40-60: Camera, 60-80: Tactics, 80-100: Rendering
+            const currentStepIndex =
+                percent < 10 ? 0 :
+                    percent < 40 ? 1 :
+                        percent < 60 ? 2 :
+                            percent < 80 ? 3 : 4;
+
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                if (index <= currentStepIndex) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        function startPolling(taskId) {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/status/${taskId}`);
+                    const data = await response.json();
+
+                    // Update Progress Bar
+                    progressBar.style.width = `${data.progress}%`;
+                    document.getElementById('progressPercent').textContent = `${data.progress}%`;
+                    document.getElementById('statusMessage').textContent = data.message;
+
+                    updateSteps(data.progress);
+
+                    if (data.status === 'completed') {
+                        clearInterval(pollInterval);
+                        setTimeout(() => showResult(data.output_file, data.stats), 1000); // Small delay for effect
+                    } else if (data.status === 'failed') {
+                        clearInterval(pollInterval);
+                        alert(`Processing failed: ${data.message}`);
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 1000);
+        }
+
+        function showResult(filename, stats) {
+            progressSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            if (stats) {
+                document.getElementById('possessionContainer').style.display = 'block';
+                document.getElementById('statsGrid').style.display = 'grid';
+
+                const t1 = stats.team_1;
+                const t2 = stats.team_2;
+
+                document.getElementById('barTeam1').style.width = `${t1.possession}%`;
+                document.getElementById('barTeam1').style.backgroundColor = t1.color;
+                document.getElementById('colorBoxTeam1').style.backgroundColor = t1.color;
+                document.getElementById('posTeam1').textContent = `${t1.possession}%`;
+
+                document.getElementById('barTeam2').style.width = `${t2.possession}%`;
+                document.getElementById('barTeam2').style.backgroundColor = t2.color;
+                document.getElementById('colorBoxTeam2').style.backgroundColor = t2.color;
+                document.getElementById('posTeam2').textContent = `${t2.possession}%`;
+
+                // Add Physical Stats
+                document.getElementById('distColor1').style.backgroundColor = t1.color;
+                document.getElementById('distTeam1').textContent = `${t1.total_distance}m`;
+                document.getElementById('distColor2').style.backgroundColor = t2.color;
+                document.getElementById('distTeam2').textContent = `${t2.total_distance}m`;
+
+                document.getElementById('speedColor1').style.backgroundColor = t1.color;
+                document.getElementById('speedTeam1').textContent = `${t1.max_speed}km/h`;
+                document.getElementById('speedColor2').style.backgroundColor = t2.color;
+                document.getElementById('speedTeam2').textContent = `${t2.max_speed}km/h`;
+            }
+
+            const videoUrl = `/download/${filename}`;
+            const videoPlayer = document.getElementById('outputVideo');
+
+            // Allow browser to determine type, but try/catch the play
+            videoPlayer.innerHTML = '';
+            const source = document.createElement('source');
+            source.src = videoUrl;
+            source.type = 'video/mp4';
+            videoPlayer.appendChild(source);
+            videoPlayer.load();
+
+            const downloadBtn = document.getElementById('downloadLink');
+            downloadBtn.href = videoUrl;
+            downloadBtn.download = filename;
+
+            // Auto play result
+            videoPlayer.play().catch(e => console.log('Auto-play prevented'));
+        }
+    </script>
+</body>
+
+</html>
