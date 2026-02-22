@@ -24,13 +24,13 @@ The application provides a fully reactive and asynchronous user-experience throu
 ### 1. Main Page: Upload & Initialization
 The primary interface provides a beautifully glass-morphed drag-and-drop zone. Users can easily upload `.mp4`, `.mov`, or `.avi` files natively through their browser. 
 
-![Upload Page Interface](images/Screenshot%202026-02-23%20012701.png)
+![Upload Page Interface](images/loading1.png)
 
 ### 2. Live Processing Engine & Asynchronous Loading
 Once a video is uploaded, the Flask server utilizes a background threading system to instantly begin processing. The UI prevents hanging by polling the server dynamically to track which stage of the Python pipeline is executing:
 * **Reading** -> **Tracking Objects** -> **Camera Motion Array Calculation** -> **Tactics/Clustering** -> **OpenCV Rendering**.
 
-![Processing & Loading Page](images/Screenshot%202026-02-23%20012826.png)
+![Processing & Loading Page](images/loading%202.png)
 
 ### 3. Analytics Dashboard & Physical Results
 Upon completion, the system transitions into an interactive statistical engine! Using the geometrical transformations mapped earlier, the dashboard outputs three critical metrics calculated over the span of the video:
@@ -40,13 +40,13 @@ Upon completion, the system transitions into an interactive statistical engine! 
 
 Each statistic features beautifully responsive hover transitions and CSS graphs dynamically assigned to the exact Hex color code clustered from the AI team tracking.
 
-![Analytics Graph Results](images/Screenshot%202026-02-23%20015802.png)
+![Analytics Graph Results](images/Main%20page.png)
 
 ### 4. Video Object Overlays
 Finally, the resulting encoded video generates directly above the statistics, allowing users to watch the entire process natively on the site, or download it! Players are tracked entirely with Team-Colored ellipses, and the ball is tracked with precise triangles.
 
-![Live Pitch Overlays 1](images/Screenshot%202026-02-23%20020954.png)
-![Live Pitch Overlays 2](images/Screenshot%202026-02-23%20021004.png)
+![Live Pitch Overlays 1](images/res1.png)
+![Live Pitch Overlays 2](images/res2.png)
 
 ---
 
